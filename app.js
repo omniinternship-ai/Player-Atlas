@@ -1,7 +1,7 @@
 (() => {
 'use strict';
 const $=id=>document.getElementById(id),fmt=n=>Number(n).toLocaleString('th-TH',{maximumFractionDigits:1});
-let busy=false,client;
+let busy=false,hasData=false;
 function clear(){for(const id of ['players','score','average','safe','mission','minigame','complete','updated'])$(id).textContent='—';$('ranking').replaceChildren();}
 function render(data){
  const s=data?.summary,ranks=data?.ranking;if(!s||!Array.isArray(ranks))throw Error('รูปแบบข้อมูลไม่ถูกต้อง');
@@ -13,7 +13,21 @@ function render(data){
  $('ranking').replaceChildren();for(const r of ranks){if(![r.rank,r.total_score,r.players].every(v=>Number.isFinite(Number(v))))throw Error('อันดับไม่ถูกต้อง');const tr=document.createElement('tr');for(const value of [fmt(r.rank),fmt(r.total_score),fmt(r.players),players?fmt(Number(r.players)/players*100)+'%':'—']){const td=document.createElement('td');td.textContent=value;tr.append(td);}$('ranking').append(tr);}
  if(!players){const tr=document.createElement('tr'),td=document.createElement('td');td.colSpan=4;td.textContent='ยังไม่มีผู้เล่นบันทึกสถิติ';tr.append(td);$('ranking').append(tr);}
 }
-async function load(){if(busy)return;busy=true;$('refresh').disabled=true;$('notice').textContent='กำลังอ่านสถิติรวมจาก Supabase…';try{const c=window.SUPABASE_CONFIG;if(!window.supabase||!c?.url)throw Error('ไม่สามารถโหลดการเชื่อมต่อได้ ตรวจอินเทอร์เน็ต');client ||= window.supabase.createClient(c.url,c.publishableKey,{auth:{persistSession:false,autoRefreshToken:false,detectSessionInUrl:false}});const {data,error}=await client.rpc('atlas_global_summary');if(error)throw error;render(data);$('modeLabel').textContent='ข้อมูลจริง · Supabase';$('notice').textContent='ข้อมูลจริงจาก v003_player_data · รวมผู้เล่นทุกพื้นที่โดยไม่ต้องเลือกจังหวัด · รีเฟรชทุก 60 วินาที';}catch(error){clear();$('modeLabel').textContent='ยังโหลดข้อมูลไม่ได้';$('notice').textContent=error.code==='PGRST202'?'ต้องติดตั้ง Player-Atlas/supabase/global-stats.sql ใน Supabase SQL Editor ก่อน เพื่ออ่านจำนวนผู้เล่นและอันดับจริง':'โหลดข้อมูลไม่ได้: '+error.message+' • ไม่มีการแสดงตัวเลขสมมติ';}finally{busy=false;$('refresh').disabled=false;}}
+async function load(){
+ if(busy)return;busy=true;$('refresh').disabled=true;$('notice').textContent='กำลังอ่านสถิติรวมจาก Supabase…';
+ const controller=new AbortController(),timeout=setTimeout(()=>controller.abort(),12000);
+ try{
+  const c=window.SUPABASE_CONFIG;if(!c?.url||!c.publishableKey)throw Error('ไม่พบการตั้งค่า Supabase');
+  // This public aggregate needs no user session or shared authentication lock.
+  const response=await fetch(c.url.replace(/\/$/,'')+'/rest/v1/rpc/atlas_global_summary',{method:'POST',headers:{apikey:c.publishableKey,'Content-Type':'application/json'},body:'{}',signal:controller.signal,cache:'no-store'});
+  const data=await response.json();if(!response.ok){const error=new Error(data.message||'HTTP '+response.status);error.code=data.code;throw error;}
+  render(data);hasData=true;$('modeLabel').textContent='ข้อมูลจริง · Supabase';$('notice').textContent='ข้อมูลจริงจาก v003_player_data · รวมผู้เล่นทุกพื้นที่โดยไม่ต้องเลือกจังหวัด · รีเฟรชทุก 60 วินาที';
+ }catch(error){
+  if(!hasData)clear();$('modeLabel').textContent=hasData?'ข้อมูลครั้งล่าสุด · อัปเดตไม่ได้':'เชื่อมต่อข้อมูลไม่ได้';
+  const reason=error.name==='AbortError'?'Supabase ตอบกลับช้าเกิน 12 วินาที กรุณากดอัปเดตข้อมูลอีกครั้ง':error.code==='PGRST202'?'ยังไม่มี API คะแนน กรุณารัน Player-Atlas/supabase/global-stats.sql ใน SQL Editor':error.message;
+  $('notice').textContent=reason+(hasData?' • ยังคงแสดงข้อมูลจริงที่โหลดสำเร็จครั้งล่าสุด':' • ยังยืนยันยอดคะแนนไม่ได้ ไม่ได้ลบหรือรีเซ็ตคะแนน');
+ }finally{clearTimeout(timeout);busy=false;$('refresh').disabled=false;}
+}
 const map=$('thailandMap'),image=$('mapImage');let zoom=1,x=0,y=0,drag=null;
 function transform(){const maxX=map.clientWidth*(zoom-1)/2,maxY=map.clientHeight*(zoom-1)/2;x=Math.max(-maxX,Math.min(maxX,x));y=Math.max(-maxY,Math.min(maxY,y));image.style.transform=`translate(${x}px,${y}px) scale(${zoom})`;$('zoomOut').disabled=zoom<=1;$('zoomIn').disabled=zoom>=3;}
 function changeZoom(delta){zoom=Math.max(1,Math.min(3,zoom+delta));transform();}
