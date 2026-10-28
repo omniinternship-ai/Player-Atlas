@@ -6,7 +6,7 @@
 1. เปิด repository omniinternship-ai/ZERO-TRUST-SIMULATOR ที่ราก
 2. Add file > Upload files แล้วลากโฟลเดอร์ Player-Atlas ในชุดนี้เข้าไปทั้งโฟลเดอร์
 3. Commit changes แล้วรอ GitHub Pages deploy สำเร็จ
-4. เปิด https://omniinternship-ai.github.io/ZERO-TRUST-SIMULATOR/Player-Atlas/
+4. เปิด [https://omniinternship-ai.github.io/ZERO-TRUST-SIMULATOR/Player-Atlas/](https://omniinternship-ai.github.io/Player-Atlas/)
 
 อย่านำ index.html ของชุดนี้ไปทับ index.html ที่รากของเกม เพราะนี่เป็นหน้าเว็บสถิติแยก
 ถ้ามี Player-Atlas เดิมอยู่แล้ว ให้อัปเดตไฟล์ในเส้นทางเดิม
