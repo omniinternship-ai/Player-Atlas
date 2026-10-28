@@ -6,7 +6,7 @@
 1. เปิด repository omniinternship-ai/ZERO-TRUST-SIMULATOR ที่ราก
 2. Add file > Upload files แล้วลากโฟลเดอร์ Player-Atlas ในชุดนี้เข้าไปทั้งโฟลเดอร์
 3. Commit changes แล้วรอ GitHub Pages deploy สำเร็จ
-4. เปิด [https://omniinternship-ai.github.io/ZERO-TRUST-SIMULATOR/Player-Atlas/](https://omniinternship-ai.github.io/Player-Atlas/)
+4. เปิด https://omniinternship-ai.github.io/ZERO-TRUST-SIMULATOR/Player-Atlas/
 
 อย่านำ index.html ของชุดนี้ไปทับ index.html ที่รากของเกม เพราะนี่เป็นหน้าเว็บสถิติแยก
 ถ้ามี Player-Atlas เดิมอยู่แล้ว ให้อัปเดตไฟล์ในเส้นทางเดิม
@@ -27,3 +27,7 @@ config.js มีเพียง publishable key สำหรับหน้า�
 คะแนนเป็นข้อมูลที่เกมส่งขึ้น Supabase ยังไม่มีการตรวจป้องกันโกงฝั่งเซิร์ฟเวอร์
 
 แพ็กเกจนี้เตรียมสำหรับอัปโหลด ยังไม่ได้ push หรือ deploy GitHub ให้จากเครื่องนี้
+
+## แผนที่ประเทศไทย
+เปลี่ยนลูกโลกเป็น assets/thailand.svg จากไฟล์ผู้ใช้ Thailand_location_map.svg ปรับสีให้เข้าธีม ไม่แก้ไฟล์ต้นฉบับ มีปุ่มซูม ย่อ คืนค่า และลากเลื่อน ยังไม่ใส่จุดผู้เล่น ใช้ API สถิติเดิม
+อัปโหลด index.html, app.js, style.css และโฟลเดอร์ assets ไปทับตำแหน่งเดิมใน repository Player-Atlas ไม่ต้องแก้ SQL เพิ่มสำหรับการเปลี่ยนแผนที่
