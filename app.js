@@ -1,5 +1,6 @@
 (() => {
 'use strict';
+if(new URLSearchParams(location.search).get('embed')==='simulation')document.documentElement.classList.add('simulation-embed');
 const $=id=>document.getElementById(id),fmt=n=>Number(n).toLocaleString('th-TH',{maximumFractionDigits:1});
 let busy=false,hasData=false;
 function clear(){for(const id of ['players','score','average','safe','mission','minigame','complete','updated'])$(id).textContent='—';$('ranking').replaceChildren();}
