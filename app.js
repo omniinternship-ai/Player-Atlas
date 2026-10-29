@@ -13,6 +13,13 @@ function render(data){
  $('ranking').replaceChildren();for(const r of ranks){if(![r.rank,r.total_score,r.players].every(v=>Number.isFinite(Number(v))))throw Error('อันดับไม่ถูกต้อง');const tr=document.createElement('tr');for(const value of [fmt(r.rank),fmt(r.total_score),fmt(r.players),players?fmt(Number(r.players)/players*100)+'%':'—']){const td=document.createElement('td');td.textContent=value;tr.append(td);}$('ranking').append(tr);}
  if(!players){const tr=document.createElement('tr'),td=document.createElement('td');td.colSpan=4;td.textContent='ยังไม่มีผู้เล่นบันทึกสถิติ';tr.append(td);$('ranking').append(tr);}
 }
+async function loadProfiles(){
+ const container=$('publicProfiles'),status=$('publicProfileStatus');if(!container)return;
+ const controller=new AbortController(),timer=setTimeout(()=>controller.abort(),10000);
+ try{const c=window.SUPABASE_CONFIG;const response=await fetch(c.url.replace(/\/$/,'')+'/rest/v1/rpc/atlas_public_profiles',{method:'POST',headers:{apikey:c.publishableKey,'Content-Type':'application/json'},body:'{}',signal:controller.signal,cache:'no-store'});const data=await response.json();if(!response.ok)throw Error(data.message||'โหลดไม่ได้');if(!Array.isArray(data))throw Error('รูปแบบข้อมูลไม่ถูกต้อง');container.replaceChildren();for(const p of data){const row=document.createElement('article');row.className='public-profile';const name=document.createElement('strong');name.textContent=p.display_name;const location=document.createElement('small');location.textContent=[p.province,p.region].filter(Boolean).join(' · ')||'ไม่เผยแพร่พื้นที่';const score=document.createElement('span');score.textContent='อันดับ '+fmt(p.rank)+' · '+fmt(p.total_score)+' คะแนน';row.append(name,location,score);container.append(row);}status.textContent=data.length?'เฉพาะผู้ยินยอมแสดงชื่อและคะแนน สูงสุด 100 โปรไฟล์':'ยังไม่มีผู้ยินยอมเผยแพร่โปรไฟล์';}
+ catch(_){container.replaceChildren();status.textContent='โปรไฟล์สาธารณะยังโหลดไม่ได้ • ตรวจการติดตั้ง player-profiles.sql';}
+ finally{clearTimeout(timer);}
+}
 async function load(){
  if(busy)return;busy=true;$('refresh').disabled=true;$('notice').textContent='กำลังอ่านสถิติรวมจาก Supabase…';
  const controller=new AbortController(),timeout=setTimeout(()=>controller.abort(),12000);
@@ -21,7 +28,7 @@ async function load(){
   // This public aggregate needs no user session or shared authentication lock.
   const response=await fetch(c.url.replace(/\/$/,'')+'/rest/v1/rpc/atlas_global_summary',{method:'POST',headers:{apikey:c.publishableKey,'Content-Type':'application/json'},body:'{}',signal:controller.signal,cache:'no-store'});
   const data=await response.json();if(!response.ok){const error=new Error(data.message||'HTTP '+response.status);error.code=data.code;throw error;}
-  render(data);hasData=true;$('modeLabel').textContent='ข้อมูลจริง · Supabase';$('notice').textContent='ข้อมูลจริงจาก v003_player_data · รวมผู้เล่นทุกพื้นที่โดยไม่ต้องเลือกจังหวัด · รีเฟรชทุก 60 วินาที';
+  render(data);hasData=true;loadProfiles();$('modeLabel').textContent='ข้อมูลจริง · Supabase';$('notice').textContent='ข้อมูลจริงจาก v003_player_data · รวมผู้เล่นทุกพื้นที่โดยไม่ต้องเลือกจังหวัด · รีเฟรชทุก 60 วินาที';
  }catch(error){
   if(!hasData)clear();$('modeLabel').textContent=hasData?'ข้อมูลครั้งล่าสุด · อัปเดตไม่ได้':'เชื่อมต่อข้อมูลไม่ได้';
   const reason=error.name==='AbortError'?'Supabase ตอบกลับช้าเกิน 12 วินาที กรุณากดอัปเดตข้อมูลอีกครั้ง':error.code==='PGRST202'?'ยังไม่มี API คะแนน กรุณารัน Player-Atlas/supabase/global-stats.sql ใน SQL Editor':error.message;
