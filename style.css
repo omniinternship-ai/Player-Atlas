@@ -8,3 +8,7 @@
 #waterParticles{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;opacity:.65}#mapImage{position:relative;z-index:1}.map-tag,.map-north{z-index:2}#thailandMap{isolation:isolate;background:radial-gradient(ellipse at center,#183c4844,transparent 70%)}
 
 .public-profiles{border-top:1px solid var(--line);margin-top:24px;padding-top:12px}.public-profiles h3{font-size:16px}.public-profile{border:1px solid var(--line);border-radius:8px;padding:12px;margin:8px 0;display:grid;gap:5px}.public-profile strong{overflow-wrap:anywhere;color:var(--mint)}.public-profile small{color:var(--muted)}.public-profile span{font-size:12px}
+
+#provinceMarkers{position:absolute;inset:0;width:100%;height:100%;z-index:2;pointer-events:none;transform-origin:center}#provinceMarkers circle{pointer-events:auto;cursor:pointer;stroke:#fff;stroke-width:3;filter:drop-shadow(0 0 5px #fff8)}#provinceMarkers circle:hover,#provinceMarkers circle:focus{stroke:#ffdc8e;stroke-width:6;outline:none}.region-filters{padding:8px 20px;display:flex;flex-wrap:wrap;gap:7px}.region-filters button{font-size:11px;padding:6px 9px;border-width:2px}.region-filters button[aria-pressed=true]{background:#365553}.map-detail{margin:8px 20px 15px;padding:12px;border:1px solid #486b6b;border-radius:8px;font-size:12px;line-height:1.8;color:#e1edeb}
+
+#provinceMarkers circle{stroke:#fff5;stroke-width:2;filter:drop-shadow(0 0 7px #efd19588)}#provinceMarkers circle:hover,#provinceMarkers circle:focus{stroke:#fff;stroke-width:4}
